@@ -1,0 +1,4 @@
+# The repository root sets eol=lf for everything; Windows scripts need CRLF.
+*.bat text eol=crlf
+gradlew text eol=lf
+*.jar binary

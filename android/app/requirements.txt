@@ -1,0 +1,7 @@
+# Python packages for the upstream proxy/ core. Installed into the APK by Chaquopy
+# (app/build.gradle.kts) and by CI for the desktop tests, so both run the same pins.
+# cryptography 42.0.8 is the newest Chaquopy Android wheel for Python 3.13; the core
+# only uses AES-CTR and X25519 from it, which upstream's own tests cover in CI.
+cryptography==42.0.8
+httpx[http2]==0.28.1
+certifi

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tile_label">TG прокси</string>
+
+    <string name="tab_home">Главная</string>
+    <string name="tab_settings">Настройки</string>
+    <string name="tab_logs">Журнал</string>
+
+    <string name="channel_proxy">Состояние прокси</string>
+    <string name="channel_proxy_desc">Показывается, пока прокси работает. Без звука.</string>
+    <string name="channel_updates">Обновления</string>
+    <string name="channel_updates_desc">Вышла новая версия приложения</string>
+
+    <string name="notif_running">Прокси работает</string>
+    <string name="notif_starting">Запуск прокси…</string>
+    <string name="notif_address">Telegram подключается к %1$s:%2$d</string>
+    <string name="action_stop">Стоп</string>
+    <string name="action_open_telegram">Подключить в Telegram</string>
+
+    <string name="state_running">Работает</string>
+    <string name="state_starting">Запуск…</string>
+    <string name="state_error">Ошибка</string>
+    <string name="state_stopped">Выключен</string>
+
+    <string name="hero_running_for">Работает %1$s. Трафик Telegram идёт через WebSocket.</string>
+    <string name="hero_starting">Запускаем Python-ядро…</string>
+    <string name="hero_error">Прокси остановился. Подробности ниже.</string>
+    <string name="hero_stopped">Нажмите, чтобы запустить локальный прокси</string>
+    <string name="chip_idle">экран погашен</string>
+    <string name="action_turn_on">Включить прокси</string>
+    <string name="action_turn_off">Выключить прокси</string>
+
+    <string name="uptime_hm">%1$d ч %2$d мин</string>
+    <string name="uptime_ms">%1$d мин %2$d с</string>
+    <string name="uptime_s">%1$d с</string>
+
+    <string name="connect_title">Подключить Telegram</string>
+    <string name="connect_body">Telegram предложит добавить прокси — нажмите «Подключить прокси». Это нужно сделать один раз.</string>
+    <string name="action_connect_telegram">Подключить в Telegram</string>
+    <string name="action_copy_link">Скопировать ссылку</string>
+
+    <string name="stat_active">соединений сейчас</string>
+    <string name="stat_total">за сессию</string>
+    <string name="stat_up">отправлено</string>
+    <string name="stat_down">получено</string>
+
+    <string name="restart_needed">Настройки изменились. Перезапустите прокси, чтобы они применились.</string>
+    <string name="action_restart">Перезапустить</string>
+    <string name="action_use_port">Взять %1$d</string>
+    <string name="hint_battery_exempt">Этот телефон может останавливать прокси в фоне. Если разрешить работу без ограничений, сервис будет жить дальше, а расход не вырастет.</string>
+    <string name="action_allow">Разрешить</string>
+
+    <string name="update_title">Доступно обновление</string>
+    <string name="action_install">Установить</string>
+    <string name="update_notif_title">Обновление TG WS Proxy</string>
+    <string name="update_notif_text">Версия %1$s готова к установке</string>
+
+    <string name="err_bad_secret">Секрет должен состоять из 32 шестнадцатеричных символов.</string>
+    <string name="err_bad_port">Неверный порт %1$s.</string>
+    <string name="err_bad_host">Неверный адрес %1$s.</string>
+    <string name="err_bad_dc_ip">Неверная запись DC:IP «%1$s».</string>
+    <string name="err_bad_fake_tls">Неверный домен Fake TLS «%1$s».</string>
+    <string name="err_bad_value">Неверное значение %1$s: %2$s</string>
+    <string name="err_port_in_use">Порт %1$s занят другим приложением.</string>
+    <string name="err_permission">Нет прав слушать порт %1$s.</string>
+    <string name="err_address">Адрес %1$s недоступен.</string>
+    <string name="err_unknown">Прокси остановился: %1$s</string>
+
+    <string name="section_battery">Батарея</string>
+    <string name="profile_speed">Скорость</string>
+    <string name="profile_balanced">Баланс</string>
+    <string name="profile_saver">Экономия</string>
+    <string name="profile_speed_desc">4 запасных соединения на дата-центр, переподключаются сразу после включения экрана. Медиа грузятся быстрее всего, расход самый высокий.</string>
+    <string name="profile_balanced_desc">2 запасных соединения, пополняются только когда Telegram действительно обращается к дата-центру. Рекомендуется.</string>
+    <string name="profile_saver_desc">Без запасных соединений: каждое новое соединение Telegram открывается само. Меньше всего пробуждений сети, первая загрузка может быть чуть дольше.</string>
+    <string name="set_idle_screen_off">Отключать запасные соединения при погашенном экране</string>
+    <string name="set_idle_screen_off_desc">Активные соединения Telegram продолжают работать</string>
+    <string name="set_battery_exempt">Работа в фоне без ограничений</string>
+    <string name="set_battery_exempt_on">Разрешено: система не остановит прокси</string>
+    <string name="set_battery_exempt_off">Ограничено: на некоторых телефонах прокси может остановиться в фоне</string>
+
+    <string name="section_connection">Подключение</string>
+    <string name="set_port">Порт</string>
+    <string name="set_port_hint">1024–65535. После смены нужно заново подключить прокси в Telegram.</string>
+    <string name="set_secret">Секрет</string>
+    <string name="set_secret_regen_title">Новый секрет?</string>
+    <string name="set_secret_regen_text">Telegram перестанет подключаться, пока вы не добавите прокси заново по новой ссылке.</string>
+    <string name="action_regenerate">Новый секрет</string>
+    <string name="set_start_on_boot">Запуск при включении телефона</string>
+    <string name="set_start_on_boot_desc">Прокси включится сам после перезагрузки</string>
+
+    <string name="section_bypass">Обход блокировок</string>
+    <string name="set_fake_tls">Домен Fake TLS</string>
+    <string name="set_fake_tls_hint">Локальное соединение будет выглядеть как TLS к этому сайту. Пусто — выключено.</string>
+    <string name="set_cfproxy">Резерв через Cloudflare</string>
+    <string name="set_cfproxy_desc">Когда дата-центр недоступен через WebSocket</string>
+    <string name="set_h2">HTTP/2 для медиа</string>
+    <string name="set_h2_desc">Медиа через Cloudflare по HTTP/2</string>
+    <string name="set_cf_domains">Свои домены Cloudflare</string>
+    <string name="set_cf_domains_hint">По одному домену в строке. Пусто — список, который скачивает ядро.</string>
+    <string name="set_cf_workers">Домены Cloudflare Worker</string>
+    <string name="set_cf_workers_hint">По одному домену Worker в строке. Пусто — выключено.</string>
+    <string name="set_dc_ip">DC → IP</string>
+    <string name="set_dc_ip_hint">DC:IP, по одной записи в строке, например 2:149.154.167.220</string>
+    <string name="value_off">Выключено</string>
+    <string name="value_auto">Авто</string>
+
+    <string name="section_logs">Журнал</string>
+    <string name="set_verbose">Подробный журнал</string>
+    <string name="set_verbose_desc">Для поиска проблем, расходует чуть больше энергии</string>
+    <string name="set_log_file">Писать журнал в файл</string>
+    <string name="set_log_file_desc">Выключено — журнал живёт только в памяти и не пишется на флеш</string>
+
+    <string name="section_updates">Обновления</string>
+    <string name="set_check_updates">Проверять обновления</string>
+    <string name="set_check_updates_desc">Раз в сутки, по релизам этого форка на GitHub</string>
+    <string name="set_check_now">Проверить сейчас</string>
+    <string name="set_last_check">Последняя проверка: %1$s</string>
+    <string name="set_never_checked">Ещё не проверялось</string>
+
+    <string name="section_advanced">Расширенные</string>
+    <string name="section_advanced_desc">Остальные параметры ядра, как их описывает само ядро. Новые опции из апстрима появляются здесь сами.</string>
+    <string name="action_reset">Вернуть по умолчанию</string>
+    <string name="hint_default_value">По умолчанию: %1$s</string>
+    <string name="hint_one_per_line">По одной записи в строке</string>
+    <string name="adv_host">Адрес прослушивания</string>
+    <string name="adv_buffer_size">Буфер сокета, байт</string>
+    <string name="adv_disable_secure">HTTP без TLS к Cloudflare (порт 80)</string>
+    <string name="adv_proxy_protocol">PROXY protocol</string>
+    <string name="adv_force_test_dc">Тестовые дата-центры Telegram</string>
+
+    <string name="section_about">О приложении</string>
+    <string name="about_version">Версия</string>
+    <string name="about_version_value">Приложение %1$s · ядро %2$s</string>
+    <string name="about_upstream">Ядро: Flowseal/tg-ws-proxy</string>
+
+    <string name="logs_empty">Журнал пуст. Он начнёт заполняться после запуска прокси.</string>
+
+    <string name="action_cancel">Отмена</string>
+    <string name="action_save">Сохранить</string>
+    <string name="action_copy">Копировать</string>
+    <string name="action_share">Поделиться</string>
+    <string name="action_clear">Очистить</string>
+
+    <string name="msg_up_to_date">Установлена последняя версия</string>
+    <string name="msg_update_failed">Не удалось обновиться: %1$s</string>
+    <string name="msg_copied">Скопировано</string>
+    <string name="msg_no_telegram">Telegram не установлен. Скопируйте ссылку и откройте её в Telegram.</string>
+</resources>

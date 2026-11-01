@@ -1,0 +1,16 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+.venv/
+.pytest_cache/
+captures/
+*.apk
+*.aab
+# Release keys never go into the repository.
+*.jks
+*.keystore
+*.p12
+keystore.properties

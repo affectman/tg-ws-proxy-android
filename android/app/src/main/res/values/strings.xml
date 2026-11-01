@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">TG WS Proxy</string>
+    <string name="tile_label">TG proxy</string>
+
+    <string name="tab_home">Home</string>
+    <string name="tab_settings">Settings</string>
+    <string name="tab_logs">Log</string>
+
+    <string name="channel_proxy">Proxy status</string>
+    <string name="channel_proxy_desc">Shown while the proxy runs. Silent.</string>
+    <string name="channel_updates">Updates</string>
+    <string name="channel_updates_desc">A new version of the app is available</string>
+
+    <string name="notif_running">Proxy is running</string>
+    <string name="notif_starting">Starting the proxy…</string>
+    <string name="notif_address">Telegram connects to %1$s:%2$d</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_open_telegram">Add to Telegram</string>
+
+    <string name="state_running">Running</string>
+    <string name="state_starting">Starting…</string>
+    <string name="state_error">Error</string>
+    <string name="state_stopped">Off</string>
+
+    <string name="hero_running_for">Up for %1$s. Telegram traffic goes through WebSocket.</string>
+    <string name="hero_starting">Starting the Python core…</string>
+    <string name="hero_error">The proxy stopped. Details below.</string>
+    <string name="hero_stopped">Tap to start the local proxy</string>
+    <string name="chip_idle">screen off</string>
+    <string name="action_turn_on">Turn the proxy on</string>
+    <string name="action_turn_off">Turn the proxy off</string>
+
+    <string name="uptime_hm">%1$d h %2$d min</string>
+    <string name="uptime_ms">%1$d min %2$d s</string>
+    <string name="uptime_s">%1$d s</string>
+
+    <string name="connect_title">Connect Telegram</string>
+    <string name="connect_body">Telegram will offer to add the proxy: tap “Connect proxy”. You only need to do this once.</string>
+    <string name="action_connect_telegram">Add to Telegram</string>
+    <string name="action_copy_link">Copy link</string>
+
+    <string name="stat_active">connections now</string>
+    <string name="stat_total">this session</string>
+    <string name="stat_up">sent</string>
+    <string name="stat_down">received</string>
+
+    <string name="restart_needed">Settings changed. Restart the proxy to apply them.</string>
+    <string name="action_restart">Restart</string>
+    <string name="action_use_port">Use %1$d</string>
+    <string name="hint_battery_exempt">This phone may stop the proxy in the background. Allowing unrestricted battery use keeps it alive and does not raise consumption.</string>
+    <string name="action_allow">Allow</string>
+
+    <string name="update_title">Update available</string>
+    <string name="action_install">Install</string>
+    <string name="update_notif_title">TG WS Proxy update</string>
+    <string name="update_notif_text">Version %1$s is ready to install</string>
+
+    <string name="err_bad_secret">The secret must be 32 hex characters.</string>
+    <string name="err_bad_port">Invalid port %1$s.</string>
+    <string name="err_bad_host">Invalid address %1$s.</string>
+    <string name="err_bad_dc_ip">Invalid DC:IP entry “%1$s”.</string>
+    <string name="err_bad_fake_tls">Invalid Fake TLS domain “%1$s”.</string>
+    <string name="err_bad_value">Invalid value of %1$s: %2$s</string>
+    <string name="err_port_in_use">Port %1$s is used by another app.</string>
+    <string name="err_permission">No permission to listen on port %1$s.</string>
+    <string name="err_address">Address %1$s is not available.</string>
+    <string name="err_unknown">The proxy stopped: %1$s</string>
+
+    <string name="section_battery">Battery</string>
+    <string name="profile_speed">Speed</string>
+    <string name="profile_balanced">Balanced</string>
+    <string name="profile_saver">Saver</string>
+    <string name="profile_speed_desc">4 spare connections per data center, re-connected right after the screen turns on. Fastest media loading, highest drain.</string>
+    <string name="profile_balanced_desc">2 spare connections, refilled only when Telegram actually uses a data center. Recommended.</string>
+    <string name="profile_saver_desc">No spare connections: every new Telegram connection opens its own. The least network wake-ups; the first load may take a moment longer.</string>
+    <string name="set_idle_screen_off">Pause spare connections when the screen is off</string>
+    <string name="set_idle_screen_off_desc">Active Telegram connections keep working</string>
+    <string name="set_battery_exempt">Unrestricted background use</string>
+    <string name="set_battery_exempt_on">Allowed: the system won\'t stop the proxy</string>
+    <string name="set_battery_exempt_off">Restricted: some phones may stop the proxy in the background</string>
+
+    <string name="section_connection">Connection</string>
+    <string name="set_port">Port</string>
+    <string name="set_port_hint">1024–65535. Telegram must be connected again after a change.</string>
+    <string name="set_secret">Secret</string>
+    <string name="set_secret_regen_title">New secret?</string>
+    <string name="set_secret_regen_text">Telegram stops connecting until you add the proxy again with the new link.</string>
+    <string name="action_regenerate">New secret</string>
+    <string name="set_start_on_boot">Start on boot</string>
+    <string name="set_start_on_boot_desc">Turns the proxy on after the phone restarts</string>
+
+    <string name="section_bypass">Bypass</string>
+    <string name="set_fake_tls">Fake TLS domain</string>
+    <string name="set_fake_tls_hint">Makes the local connection look like TLS to this site. Leave empty to turn off.</string>
+    <string name="set_cfproxy">Fallback through Cloudflare</string>
+    <string name="set_cfproxy_desc">When a data center is unreachable over WebSocket</string>
+    <string name="set_h2">HTTP/2 for media</string>
+    <string name="set_h2_desc">Media through Cloudflare over HTTP/2</string>
+    <string name="set_cf_domains">Own Cloudflare domains</string>
+    <string name="set_cf_domains_hint">One domain per line. Empty: the list the core downloads.</string>
+    <string name="set_cf_workers">Cloudflare Worker domains</string>
+    <string name="set_cf_workers_hint">One Worker domain per line. Empty: off.</string>
+    <string name="set_dc_ip">DC → IP</string>
+    <string name="set_dc_ip_hint">DC:IP, one per line, e.g. 2:149.154.167.220</string>
+    <string name="value_off">Off</string>
+    <string name="value_auto">Auto</string>
+
+    <string name="section_logs">Log</string>
+    <string name="set_verbose">Detailed log</string>
+    <string name="set_verbose_desc">For troubleshooting; uses a little more power</string>
+    <string name="set_log_file">Write the log to a file</string>
+    <string name="set_log_file_desc">Off: the log lives in memory only and never touches storage</string>
+
+    <string name="section_updates">Updates</string>
+    <string name="set_check_updates">Check for updates</string>
+    <string name="set_check_updates_desc">Once a day, from this fork\'s GitHub releases</string>
+    <string name="set_check_now">Check now</string>
+    <string name="set_last_check">Last check: %1$s</string>
+    <string name="set_never_checked">Not checked yet</string>
+
+    <string name="section_advanced">Advanced</string>
+    <string name="section_advanced_desc">Other core options, as the core describes them. New upstream options appear here by themselves.</string>
+    <string name="action_reset">Reset to default</string>
+    <string name="hint_default_value">Default: %1$s</string>
+    <string name="hint_one_per_line">One entry per line</string>
+    <string name="adv_host">Listen address</string>
+    <string name="adv_buffer_size">Socket buffer, bytes</string>
+    <string name="adv_disable_secure">Plain HTTP to Cloudflare (port 80)</string>
+    <string name="adv_proxy_protocol">PROXY protocol</string>
+    <string name="adv_force_test_dc">Telegram test data centers</string>
+
+    <string name="section_about">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_version_value">App %1$s · core %2$s</string>
+    <string name="about_upstream">Core: Flowseal/tg-ws-proxy</string>
+
+    <string name="logs_empty">The log is empty. It fills in once the proxy starts.</string>
+
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_share">Share</string>
+    <string name="action_clear">Clear</string>
+
+    <string name="msg_up_to_date">You have the latest version</string>
+    <string name="msg_update_failed">Update failed: %1$s</string>
+    <string name="msg_copied">Copied</string>
+    <string name="msg_no_telegram">Telegram is not installed. Copy the link and open it in Telegram.</string>
+</resources>
