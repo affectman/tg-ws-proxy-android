@@ -4,7 +4,10 @@ name: Upstream sync
 # merge, and only when it is green move main forward and publish a release.
 # A red merge or a red build opens an issue and leaves main untouched.
 #
-# Requires: Settings -> Actions -> General -> Workflow permissions: "Read and write".
+# Requires the TGWS_SYNC_TOKEN secret: a fine-grained token for this repository with
+# Contents and Workflows read/write. The default Actions token can't push commits that
+# touch .github/workflows, and upstream edits its own workflows often. Without the
+# secret ordinary merges still pass, but such a merge fails and opens an issue.
 
 on:
   schedule:
@@ -30,6 +33,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.TGWS_SYNC_TOKEN || github.token }}
 
       - name: Merge upstream/main
         id: merge
@@ -76,6 +80,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.TGWS_SYNC_TOKEN || github.token }}
       - name: Fast-forward main to the verified merge
         env:
           BRANCH: ${{ needs.merge.outputs.branch }}
@@ -104,13 +109,21 @@ jobs:
           GH_REPO: ${{ github.repository }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           UPSTREAM: ${{ needs.merge.outputs.upstream }}
+          MAIN_MOVED: ${{ needs.advance-main.result == 'success' }}
         run: |
           title="Upstream sync failed${UPSTREAM:+ at $UPSTREAM}"
+          if [ "$MAIN_MOVED" = "true" ]; then
+            state="main already has the merge, but the release was not published.
+          Re-run the failed jobs of this run, or dispatch Android CI with publish enabled."
+          else
+            state="main and the published APK are unchanged. Usually an upstream change broke the Android adapter:
+          the failing test in android/tests names what moved. Fix it on the upstream-sync branch,
+          or delete that branch to let tomorrow's run try again.
+          If the log says a push of a workflow file was refused, TGWS_SYNC_TOKEN is missing or expired."
+          fi
           body="The daily merge of Flowseal/tg-ws-proxy did not pass: $RUN
 
-          main and the published APK are unchanged. Usually an upstream change broke the Android adapter:
-          the failing test in android/tests names what moved. Fix it on the upstream-sync branch,
-          or delete that branch to let tomorrow's run try again."
+          $state"
           existing=$(gh issue list --state open --search "in:title \"Upstream sync failed\"" --json number --jq '.[0].number')
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
