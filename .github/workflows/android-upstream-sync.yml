@@ -1,0 +1,119 @@
+name: Upstream sync
+
+# Once a day: merge Flowseal/tg-ws-proxy main, run the whole Android CI on the
+# merge, and only when it is green move main forward and publish a release.
+# A red merge or a red build opens an issue and leaves main untouched.
+#
+# Requires: Settings -> Actions -> General -> Workflow permissions: "Read and write".
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.merge.outputs.branch }}
+      upstream: ${{ steps.merge.outputs.upstream }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Merge upstream/main
+        id: merge
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/Flowseal/tg-ws-proxy.git
+          git fetch --no-tags upstream main
+
+          if git merge-base --is-ancestor upstream/main HEAD; then
+            echo "Already up to date with upstream."
+            exit 0
+          fi
+
+          short=$(git rev-parse --short upstream/main)
+          branch="upstream-sync/$short"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null; then
+            echo "$branch exists: this upstream commit was tried before and failed; see the open issue."
+            exit 0
+          fi
+
+          git checkout -b "$branch"
+          # Fork files live only in paths upstream doesn't have, so this can only
+          # conflict if someone edited an upstream file (the CI guard forbids it).
+          git merge --no-edit -m "Merge upstream tg-ws-proxy $short" upstream/main
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "upstream=$short" >> "$GITHUB_OUTPUT"
+
+  verify:
+    needs: merge
+    if: needs.merge.outputs.branch != ''
+    uses: ./.github/workflows/android-ci.yml
+    secrets: inherit
+    with:
+      ref: ${{ needs.merge.outputs.branch }}
+      publish: false
+
+  advance-main:
+    needs: [merge, verify]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Fast-forward main to the verified merge
+        env:
+          BRANCH: ${{ needs.merge.outputs.branch }}
+        run: |
+          git fetch origin "$BRANCH"
+          git merge --ff-only "origin/$BRANCH"
+          git push origin main
+          git push origin --delete "$BRANCH"
+
+  release:
+    needs: advance-main
+    uses: ./.github/workflows/android-ci.yml
+    secrets: inherit
+    with:
+      ref: main
+      publish: true
+
+  report-failure:
+    needs: [merge, verify, advance-main, release]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open an issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UPSTREAM: ${{ needs.merge.outputs.upstream }}
+        run: |
+          title="Upstream sync failed${UPSTREAM:+ at $UPSTREAM}"
+          body="The daily merge of Flowseal/tg-ws-proxy did not pass: $RUN
+
+          main and the published APK are unchanged. Usually an upstream change broke the Android adapter:
+          the failing test in android/tests names what moved. Fix it on the upstream-sync branch,
+          or delete that branch to let tomorrow's run try again."
+          existing=$(gh issue list --state open --search "in:title \"Upstream sync failed\"" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

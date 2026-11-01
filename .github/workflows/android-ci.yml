@@ -1,0 +1,198 @@
+name: Android CI
+
+# Guard, tests and APK build for the Android app. Also called by
+# android-upstream-sync.yml: first to verify a merge of upstream, then to publish
+# the release once main has it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a GitHub release from this commit
+        type: boolean
+        default: false
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to test and build
+        type: string
+        required: true
+      publish:
+        type: boolean
+        default: false
+    outputs:
+      version:
+        description: versionName of the built APK
+        value: ${{ jobs.build.outputs.version }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-ci-${{ inputs.ref || github.ref }}-${{ inputs.publish || false }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  guard:
+    name: Upstream files untouched
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+      # The whole update story rests on this: if no upstream file is ever edited,
+      # merging upstream can't conflict. Compared against the merge base, so
+      # upstream commits we haven't merged yet don't count.
+      - name: Only fork-owned paths differ from upstream
+        run: |
+          git remote add upstream https://github.com/Flowseal/tg-ws-proxy.git
+          git fetch --no-tags --quiet upstream main
+          base=$(git merge-base upstream/main HEAD)
+          changed=$(git diff --name-only "$base" HEAD)
+          bad=$(printf '%s\n' "$changed" | grep -v -E '^(android/|\.github/README\.md$|\.github/workflows/android-[^/]+\.yml$)' | grep -v '^$' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::These upstream files were edited in the fork; move the change under android/ instead:"
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          echo "Fork-only changes:"; printf '%s\n' "$changed"
+
+  python:
+    name: Core and adapter tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      # The same pins Chaquopy puts into the APK.
+      - run: pip install -r android/app/requirements.txt pytest
+      - name: Upstream core tests (without the desktop tray)
+        run: |
+          core_tests=$(grep -L -E 'tray_common|from ui|import ui|from utils|import utils|customtkinter|pystray|psutil' tests/test_*.py)
+          echo "$core_tests"
+          python -m pytest -q $core_tests
+      - name: Android adapter contract tests
+        run: python -m pytest -q -rw android/tests
+
+  build:
+    name: APK
+    needs: [guard, python]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.name }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0  # versionCode is the commit count
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+      # Chaquopy needs a build Python with the same major.minor as the app.
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Version
+        id: version
+        run: |
+          core=$(sed -nE 's/^__version__ = "([^"]+)"/\1/p' proxy/__init__.py)
+          name="$core-android.$(git rev-list --count HEAD)"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "core=$core" >> "$GITHUB_OUTPUT"
+          echo "Building $name"
+
+      # Secrets are absent for pull requests from other forks: those stay debug-signed.
+      - name: Release key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TGWS_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.p12"
+            echo "TGWS_KEYSTORE_FILE=$RUNNER_TEMP/release.p12" >> "$GITHUB_ENV"
+          else
+            echo "No TGWS_KEYSTORE_BASE64 secret; the release APK is debug-signed."
+          fi
+
+      - name: Lint, unit tests, release APK
+        working-directory: android
+        env:
+          TGWS_KEYSTORE_PASSWORD: ${{ secrets.TGWS_KEYSTORE_PASSWORD }}
+          TGWS_KEY_ALIAS: ${{ secrets.TGWS_KEY_ALIAS }}
+          TGWS_KEY_PASSWORD: ${{ secrets.TGWS_KEY_PASSWORD }}
+        # chmod: a commit made on Windows may lose the executable bit.
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon lintRelease testDebugUnitTest assembleRelease
+
+      - name: Check signature
+        run: |
+          rm -f "$RUNNER_TEMP/release.p12"
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          signer=$("$apksigner" verify --print-certs android/app/build/outputs/apk/release/app-release.apk | grep -m1 'certificate DN')
+          echo "$signer"
+          if [ "${{ inputs.publish }}" = "true" ] && [[ "$signer" == *"Android Debug"* ]]; then
+            echo "::error::A published release must be signed with the release key, or phones refuse to update."
+            exit 1
+          fi
+
+      - name: Name the APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk "out/tg-ws-proxy-android-${{ steps.version.outputs.name }}.apk"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: apk
+          path: out/*.apk
+          if-no-files-found: error
+
+  publish:
+    name: GitHub release
+    needs: build
+    if: inputs.publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          name: apk
+          path: out
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          tag="v$VERSION"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release $tag already exists."
+            exit 0
+          fi
+          prev=$(git tag --list 'v*-android.*' --sort=-v:refname | head -1)
+          core=$(sed -nE 's/^__version__ = "([^"]+)"/\1/p' proxy/__init__.py)
+          {
+            echo "Ядро tg-ws-proxy **$core**."
+            echo
+            if [ -n "$prev" ]; then
+              echo "### Изменения с $prev"
+              git log --no-merges --format='- %s' "$prev..HEAD" | head -60
+            fi
+            echo
+            echo "Установка: скачайте APK ниже. Обновление ставится поверх, настройки сохраняются."
+          } > notes.md
+          gh release create "$tag" out/*.apk --target "$(git rev-parse HEAD)" \
+            --title "TG WS Proxy $VERSION" --notes-file notes.md
