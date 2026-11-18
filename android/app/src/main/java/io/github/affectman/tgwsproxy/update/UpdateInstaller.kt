@@ -1,7 +1,12 @@
 package io.github.affectman.tgwsproxy.update
 
+import android.content.ActivityNotFoundException
+import android.content.ClipData
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.core.net.toUri
 import android.provider.Settings
 import androidx.core.content.FileProvider
@@ -44,16 +49,29 @@ object UpdateInstaller {
         if (PackageInfoCompat.getLongVersionCode(archive) <= BuildConfig.VERSION_CODE) {
             return Result.Failed("not newer")
         }
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", apk)
-        val intent = Intent(Intent.ACTION_VIEW)
-            .setDataAndType(uri, "application/vnd.android.package-archive")
-            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
         return try {
-            context.startActivity(intent)
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.files", apk)
+            context.startActivity(installIntent(context, uri))
             Result.Launched
         } catch (e: Exception) {
             Result.Failed(e.message ?: "no installer")
         }
+    }
+
+    internal fun installIntent(context: Context, uri: Uri): Intent {
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setDataAndType(uri, "application/vnd.android.package-archive")
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK)
+            .apply { clipData = ClipData.newRawUri(uri.lastPathSegment, uri) }
+
+        // A generic ACTION_VIEW can be captured by SAI, whose forwarding activity
+        // does not preserve URI grant flags when forwarding to its main activity.
+        // Discover the system handler instead of hardcoding a Pixel/OEM package name.
+        val installer = context.packageManager.queryIntentActivities(
+            intent, PackageManager.MATCH_DEFAULT_ONLY or PackageManager.MATCH_SYSTEM_ONLY,
+        ).firstOrNull { it.activityInfo.exported && it.activityInfo.enabled }?.activityInfo
+            ?: throw ActivityNotFoundException("No system APK installer available")
+        return intent.setComponent(ComponentName(installer.packageName, installer.name))
     }
 
     private suspend fun download(context: Context, url: String, onProgress: (Float) -> Unit): File =

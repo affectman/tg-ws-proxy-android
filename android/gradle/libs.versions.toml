@@ -12,6 +12,7 @@ work = "2.12.0"
 graphicsShapes = "1.1.0"
 junit = "4.13.2"
 orgJson = "20260814"
+robolectric = "4.18.1"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -32,6 +33,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 junit = { module = "junit:junit", version.ref = "junit" }
 # android.jar only has stubs of org.json; JVM unit tests need the real thing.
 org-json = { module = "org.json:json", version.ref = "orgJson" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

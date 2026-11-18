@@ -17,6 +17,11 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="tg" />
         </intent>
+        <!-- Discover the system APK installer even when SAI handles APKs by default. -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="content" android:mimeType="application/vnd.android.package-archive" />
+        </intent>
     </queries>
 
     <!-- No backups: settings hold the proxy secret. -->
